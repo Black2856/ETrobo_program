@@ -2,7 +2,7 @@
 #include "stdio.h"
 #include "complex"
 
-Tracer::Tracer():
+Tracer::Tracer()://車輪ごとにポート割り当て?
   leftWheel(PORT_C), rightWheel(PORT_B), colorSensor(PORT_3) { // <2>
   }
 
@@ -10,22 +10,18 @@ void Tracer::init() {
   init_f("Tracer");
 }
 
-void Tracer::reset(){
+void Tracer::reset(){//Ｉ制御の合計のリセット
   total = 0;
   printf("------リセット------\n");
 }
 
-void Tracer::set_turn(int8_t T){
-  turn = T;
-}
-
-void Tracer::terminate() {
+void Tracer::terminate() {//停止処理?
   msg_f("Stopped.", 1);
   leftWheel.stop();  // <1>
   rightWheel.stop();
 }
-//pwm 70 pid(1.24,0,0.32)
-float Tracer::PID(int max,int r,float Kp,float Ki,float Kd){//PID制御
+//pwm 70 pid(1.44,0,0.32)
+float Tracer::PID(int max,int r,float Kp,float Ki,float Kd){//PID制御(最大値,目標値,P値,I値,D値)
 
   et[1] = et[0];
   et[0] = colorSensor.getBrightness() - r;//偏差
@@ -37,7 +33,7 @@ float Tracer::PID(int max,int r,float Kp,float Ki,float Kd){//PID制御
   //printf("%f,%f,%f■",P,I,D);
 
   float ret = P + I + D;
-  if(-max > ret){
+  if(-max > ret){//retの範囲を -max <= ret <= max にする 
     ret = -max;
   }else if(max < ret){
     ret = max;
@@ -45,27 +41,14 @@ float Tracer::PID(int max,int r,float Kp,float Ki,float Kd){//PID制御
   return P + I + D;
 }
 
-void Tracer::run() {
+void Tracer::run() {//ライントレースのメイン処理
   msg_f("running...", 1);
 
+  curve = PID(pwm,22,1.44,0,0.32);
+  leftWheel.setPWM((pwm) - curve);//pwmからPID処理で算出したカーブ量を減算
+  rightWheel.setPWM((pwm) + curve);//pwmからPID処理で算出したカーブ量を加算
+
   //printf("%o,",colorSensor.getBrightness()); //明るさ表示用 暗 0~50 明
-if(turn == 0){//走行状態
-  curve = PID(pwm,22,1.24,0,0.32);
-  leftWheel.setPWM((pwm) - curve);
-  rightWheel.setPWM((pwm) + curve);
-}else{//回転状態
-  if(turn > 1){//
-    curve = 40;
-    turn--;
-  }else{
-    curve = PID(20,6,2,0,0.3);
-    if(4 > colorSensor.getBrightness()){
-      turn = 0;
-    }
-  }
-  leftWheel.setPWM(-curve);
-  rightWheel.setPWM(curve);
-}
 
 /*
   if(colorSensor.getBrightness() >= mThreshold) { // <1>

@@ -23,8 +23,6 @@ void main_task(intptr_t unused) { // <1>
   while (!ev3_button_is_pressed(LEFT_BUTTON)) { // <1>
       clock.sleep(duration);   // <2>
       if(ev3_button_is_pressed(RIGHT_BUTTON)){
-        //tracer.reset();
-        tracer.set_turn(10);
       }
   }
 

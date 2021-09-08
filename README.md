@@ -1,3 +1,5 @@
-# ETrobo_PID
-Tracer.cppにPID制御が入っています
-1,簡単な説明と余計な処理を削除
+# ETrobo_program
+タッチセンサー開始処理
+青ライン停止処理
+PID制御
+

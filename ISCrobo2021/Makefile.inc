@@ -4,7 +4,9 @@ APPL_COBJS +=
 
 APPL_CXXOBJS += \
 util.o \
-runningArea.o
+section.o \
+status.o \
+control.o
 
 SRCLANG := c++
 
